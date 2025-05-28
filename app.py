@@ -63,13 +63,13 @@ def send_daily_email(count, log):
 def schedule_daily_report():
     while True:
         now = datetime.now()
-        target = datetime.combine(now.date(), time(10, 30))
+        target = datetime.combine(now.date(), time(10, 40))
 
         if now > target:
             target = target.replace(day=now.day + 1)
 
         wait_seconds = (target - now).total_seconds()
-        print(f"Próximo envio programado para às 18h. Aguardando {wait_seconds:.0f} segundos...")
+        print(f"Próximo envio programado para às 10h40. Aguardando {wait_seconds:.0f} segundos...")
         time_module.sleep(wait_seconds)
 
         with lock:
