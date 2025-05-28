@@ -104,11 +104,11 @@ def track_visit():
     register_visit()
     return '', 204
 
-@app.route('/enviar-relatorio-agora')
-def enviar_relatorio_agora():
-    with lock:
-        send_daily_email(access_count, visit_log)
-    return 'Relatório enviado!'
+# @app.route('/enviar-relatorio-agora')
+# def enviar_relatorio_agora():
+#     with lock:
+#         send_daily_email(access_count, visit_log)
+#     return 'Relatório enviado!'
 
 def register_visit():
     global access_count, visit_log, visitor_info
