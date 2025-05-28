@@ -63,7 +63,7 @@ def send_daily_email(count, log):
 def schedule_daily_report():
     while True:
         now = datetime.now()
-        target = datetime.combine(now.date(), time(18, 0))
+        target = datetime.combine(now.date(), time(10, 30))
 
         if now > target:
             target = target.replace(day=now.day + 1)
