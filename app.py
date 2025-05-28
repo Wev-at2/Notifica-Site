@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from dotenv import load_dotenv
 import smtplib
 from email.mime.text import MIMEText
@@ -21,8 +21,8 @@ SMTP_PORT = int(os.getenv('SMTP_PORT', 587))
 
 # Variáveis globais
 access_count = 0
-visit_log = defaultdict(int)  # Ex: {'17:00': 3}
-lock = threading.Lock()
+visit_log = defaultdict(int)
+visitor_info = []  # NOVA LISTA PARA DETALHES
 
 def send_daily_email(count, log):
     try:
@@ -35,6 +35,14 @@ def send_daily_email(count, log):
         else:
             time_list_html = "<p>Nenhuma visita registrada hoje.</p>"
 
+        # Adiciona detalhes dos visitantes
+        if visitor_info:
+            visitor_details = "<ul>" + "".join(
+                f"<li>{v['hora']} - IP: {v['ip']} - Navegador: {v['user_agent']}</li>" for v in visitor_info
+            ) + "</ul>"
+        else:
+            visitor_details = "<p>Sem detalhes de visitantes.</p>"
+
         html_content = f"""
         <html>
         <body>
@@ -42,6 +50,8 @@ def send_daily_email(count, log):
         <p>Relatório diário de acessos - {now.strftime('%d/%m/%Y')}</p>
         <p><strong>Horários das visitas:</strong></p>
         {time_list_html}
+        <p><strong>Detalhes dos visitantes:</strong></p>
+        {visitor_details}
         <img src="GIF OU IMAGEM">
         </body>
         </html>
@@ -99,12 +109,18 @@ def enviar_relatorio_agora():
     return 'Relatório enviado!'
 
 def register_visit():
-    global access_count, visit_log
+    global access_count, visit_log, visitor_info
     with lock:
         access_count += 1
         hour_str = datetime.now().strftime('%H:%M')
         visit_log[hour_str] += 1
-        print(f"Visita registrada às {hour_str} — Total: {access_count}")
+
+        # Captura IP e User-Agent
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        user_agent = request.headers.get('User-Agent', 'desconhecido')
+        visitor_info.append({'hora': hour_str, 'ip': ip, 'user_agent': user_agent})
+
+        print(f"Visita registrada às {hour_str} — Total: {access_count} — IP: {ip} — UA: {user_agent}")
 
 if __name__ == '__main__':
     app.run(debug=True)
