@@ -23,6 +23,7 @@ SMTP_PORT = int(os.getenv('SMTP_PORT', 587))
 access_count = 0
 visit_log = defaultdict(int)
 visitor_info = []  # NOVA LISTA PARA DETALHES
+lock = threading.Lock()
 
 def send_daily_email(count, log):
     try:
