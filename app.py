@@ -8,6 +8,7 @@ from flask_cors import CORS
 import threading
 import time as time_module
 from collections import defaultdict
+from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
 CORS(app)
@@ -74,13 +75,13 @@ def send_daily_email(count, log):
 def schedule_daily_report():
     while True:
         now = datetime.now()
-        target = datetime.combine(now.date(), time(10, 40))
+        target = datetime.combine(now.date(), time(18, 00))
 
         if now > target:
             target = target.replace(day=now.day + 1)
 
         wait_seconds = (target - now).total_seconds()
-        print(f"Próximo envio programado para às 10h40. Aguardando {wait_seconds:.0f} segundos...")
+        print(f"Próximo envio programado para às 18h. Aguardando {wait_seconds:.0f} segundos...")
         time_module.sleep(wait_seconds)
 
         with lock:
@@ -113,10 +114,10 @@ def register_visit():
     global access_count, visit_log, visitor_info
     with lock:
         access_count += 1
-        hour_str = datetime.now().strftime('%H:%M')
+        now_br = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        hour_str = now_br.strftime('%H:%M')
         visit_log[hour_str] += 1
 
-        # Captura IP e User-Agent
         ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         user_agent = request.headers.get('User-Agent', 'desconhecido')
         visitor_info.append({'hora': hour_str, 'ip': ip, 'user_agent': user_agent})
